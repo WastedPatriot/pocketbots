@@ -19,10 +19,8 @@ Prices move. Look them up; nothing below has one baked in.
 | Thing | Notes | Where to look in the UK |
 | --- | --- | --- |
 | Waveshare ESP32-S3-Touch-AMOLED-1.64, V1.1 | ESP32-S3R8, 16 MB flash, 8 MB octal PSRAM. Leave the 2×11 2.54 mm headers off if it has to close. | Waveshare's shop, RobotShop EU, Amazon marketplace |
-| 1S LiPo, PicoBlade / MX1.25 2-pin | The bay is 35 × 25 × 4 mm, leads toward the USB end. A 302535-class cell sits flat. A 402535 is long for it. | The Pi Hut sells PicoBlade cells |
-| 4× M2 socket-head screws, about 8 mm | In from the back. | Accu, The Pi Hut |
-| 4× M2 heat-set inserts, ~3.5 mm long | The hole in the model is 3.2 mm. | Accu |
-| PLA | Two colours if you want the plunger to disappear. | Whoever you already buy filament from |
+| 1S LiPo, PicoBlade / MX1.25 2-pin | The bay is 31 × 26 × 3.7 mm, leads toward the USB end. A 302535 sits in it. | The Pi Hut sells PicoBlade cells |
+| PLA | The shell snaps. No screws, no inserts. A second colour makes the little side button easier to see. | Whoever you already buy filament from |
 | USB-C cable that carries data | A charge-only cable will power it and refuse to flash it. | The drawer, then a shop |
 
 A TPU reel is only for `enclosure/stl/bumper.stl`, which is a later skin, not part of the first build.
@@ -33,7 +31,7 @@ Read the silkscreen next to the battery socket before you plug anything in. V1.1
 
 ## Pins
 
-Nothing here needs a soldering iron. The battery plugs in. USB-C is the data and the charge path. BOOT (GPIO0, active low) is the button under the plunger. Reset is the pinhole beside it.
+Nothing here needs a soldering iron. The battery plugs in. USB-C is the data and the charge path. BOOT (GPIO0, active low) is the button under the side plunger. Reset stays the button on the module; the shell leaves it inside.
 
 | Signal | V1.1 | V1 |
 | --- | --- | --- |

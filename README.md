@@ -50,12 +50,14 @@ A PNG still works, if you would rather drop one in. Put it under `assets/`, set 
 
 ## The case
 
-PLA, two shells, four M2 screws from the back into heat-set inserts, so the face stays plain. The loop is part of the back and is the full thickness of the device. Print both outside-face down. No supports.
+The shape to chase was the [Amoeba One](https://www.amoebaone.com/): a moulded pebble, glass close to the edge, a little loop at one corner for the keys. This one is PLA rather than silicone, and the loop is printed with the back so the hole is a ring of perimeters. The two halves snap. There is nothing to unscrew on the face, or on the back.
 
 ![Front](docs/images/case-front.png)
+![Cyber on the glass](docs/images/case-cyber.png)
+![Assembled](docs/images/case-three-quarter.png)
 ![Back](docs/images/case-back.png)
 
-The glass size and the mounting holes come from the module drawing. The USB slot and the button positions do not, because the drawing doesn't say. They are parameters at the top of [`enclosure/pocketbots.scad`](enclosure/pocketbots.scad). Print one, look, change a number. Steps and the print settings are in [docs/assembly.md](docs/assembly.md). The STLs beside the scad match the defaults.
+The glass size comes from the module drawing. The USB slot and the button do not, because the drawing doesn't say. They are parameters at the top of [`enclosure/pocketbots.scad`](enclosure/pocketbots.scad). Print one, look, change a number. Steps are in [docs/assembly.md](docs/assembly.md). The STLs beside the scad match the defaults.
 
 `enclosure/stl/bumper.stl` is a TPU skin for later. It is not part of the first print.
 
@@ -74,7 +76,7 @@ pio run -e esp32s3 -t upload
 ## Credits
 
 - [HackCharm](https://github.com/shiva233/HackCharm) — a keychain with a personality, which is the right amount of ambition.
-- [Keybuddy](https://github.com/trkgmssy/Keybuddy) — the same Waveshare 1.64. The battery divider is ×3, the QMI8658 setup is theirs, and the shake threshold is too. Their case is a magnet; this one is screws.
+- [Keybuddy](https://github.com/trkgmssy/Keybuddy) — the same Waveshare 1.64. The battery divider is ×3, the QMI8658 setup is theirs, and the shake threshold is too. Their case is a magnet; this one snaps shut.
 - [ESP32 third-eye](https://github.com/Jekyllz/ESP32-third-eye) — another small thing on a ring, useful as a reminder of how little room there is.
 - Waveshare's demos for this module, and the LilyGo boards that made QSPI CO5300 / SH8601 less of a private joke.
 - Espressif's [`esp_lcd_co5300`](https://components.espressif.com/components/espressif/esp_lcd_co5300) from esp-iot-solution, Apache-2.0, vendored under `firmware/lib/esp_lcd_co5300`. One line of that header was changed so it compiles here. See [NOTICE](NOTICE).
