@@ -55,15 +55,16 @@ front_h = recess + panel_t;
 air = 0.40;
 back_skin = 1.70;
 
-/* [Cell — lies above the XIAO, not under the lens] */
-bat_w = 28;
-bat_l = 16;
-bat_t = 4.0;
-cell_y = 9.4;
+/* [Cell — a 26 × 21 × 4 mm pack, above the XIAO, not under the lens.
+   That is the Pi Hut 150 mAh cell. Cut the plug off and solder the leads. */
+bat_w = 26;
+bat_l = 21;
+bat_t = 4.2;
+cell_y = 9.7;
 
 /* [Lens — centre of the Sense board, USB toward the bottom] */
 lens_x = 0;
-lens_y = -8.2;
+lens_y = -10.2;
 lens_d = 4.8;
 ring_d = 10.4;
 ring_deep = 0.55;
