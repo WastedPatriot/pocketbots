@@ -1,0 +1,21 @@
+# PlatformIO
+.pio/
+**/.pio/
+.pioenvs/
+.piolibdeps/
+
+# secrets — copy secrets.example.h to secrets.h, and leave it here
+.env
+.env.*
+secrets.h
+credentials.h
+*.pem
+*.key
+
+# local
+frames/
+**/__pycache__/
+*.pyc
+.DS_Store
+enclosure/render-tmp/
+*.stl.tmp

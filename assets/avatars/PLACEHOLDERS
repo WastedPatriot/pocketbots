@@ -1,0 +1,14 @@
+These PNGs are stand-ins. The word PLACEHOLDER is burned into them
+so they cannot be mistaken for finished faces.
+
+The firmware does not use them. Cyber and Vik are drawn in code
+(see assets/bots.json; leave "image" unset for the animated mark).
+
+To drop in your own:
+  1. Export a square PNG. Transparent background is fine.
+  2. Put it in this folder.
+  3. In assets/bots.json set "image": "avatars/your.png".
+  4. python3 tools/png_to_c.py
+  5. Rebuild the firmware.
+
+A PNG replaces the drawn shape. It will not blink. It still bobs.

@@ -1,0 +1,32 @@
+{
+  "brightness": 40,
+  "ambient_brightness": 8,
+  "ambient_after_s": 20,
+  "sleep_after_s": 90,
+  "bots": [
+    {
+      "id": "cyber",
+      "name": "Cyber",
+      "subtitle": "keeping watch",
+      "shape": "hexagon",
+      "color": "blue",
+      "hidden": false
+    },
+    {
+      "id": "vik",
+      "name": "Vik",
+      "subtitle": "ready when you are",
+      "shape": "cloud",
+      "color": "orange",
+      "hidden": false
+    },
+    {
+      "id": "moth",
+      "name": "Moth",
+      "subtitle": "found in the lining",
+      "shape": "blob",
+      "color": "grey",
+      "hidden": true
+    }
+  ]
+}
