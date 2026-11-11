@@ -11,7 +11,7 @@
 /* Viewfinder and the on-device roll. Nothing here leaves the device.
    The shutter and the keep pill share a centre at (W/2, H-42) so the
    simulator can hit both with one coordinate. The lens button that
-   opens this is in ui.cpp, at (28, H-28). */
+   opens this is in ui.cpp, at (21, H-19). */
 
 #define BG 0x141416
 #define INK 0xF2F2F3

@@ -17,8 +17,8 @@ enum { k_max_pages = 12 };
 
 static int mark_px(void) { return PB_DISP_H >= 400 ? 176 : 128; }
 static int mark_oy(void) { return PB_DISP_H >= 400 ? -28 : -16; }
-static int name_oy(void) { return PB_DISP_H >= 400 ? 108 : 70; }
-static int sub_oy(void) { return PB_DISP_H >= 400 ? 142 : 96; }
+static int name_oy(void) { return PB_DISP_H >= 400 ? 108 : 62; }
+static int sub_oy(void) { return PB_DISP_H >= 400 ? 142 : 84; }
 
 static lv_obj_t *scroller;
 static lv_obj_t *dots[k_max_pages];
@@ -370,15 +370,15 @@ static void build_chrome(void) {
     }, LV_EVENT_CLICKED, NULL);
 
     if (!port_camera_available()) return;
-    /* Bottom-left, clear of the dots. Centre lands on (28, H-28), which
-       the simulator taps. A ring and a dot, nothing else. */
+    /* Bottom-left, under the subtitle. Centre is (21, H-19), which the
+       simulator taps. A ring and a dot, nothing else. */
     lens_btn = lv_obj_create(lv_screen_active());
-    lv_obj_set_size(lens_btn, 32, 32);
+    lv_obj_set_size(lens_btn, 26, 26);
     lv_obj_set_style_radius(lens_btn, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_bg_opa(lens_btn, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_color(lens_btn, lv_color_hex(0xC8C8CE), 0);
     lv_obj_set_style_border_width(lens_btn, 2, 0);
-    lv_obj_align(lens_btn, LV_ALIGN_BOTTOM_LEFT, 12, -12);
+    lv_obj_align(lens_btn, LV_ALIGN_BOTTOM_LEFT, 8, -6);
     lv_obj_remove_flag(lens_btn, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(lens_btn, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_ext_click_area(lens_btn, 8);

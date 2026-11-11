@@ -97,8 +97,8 @@ bool port_read_touch(int *x, int *y) {
     if (sheet) return false;
     if (lens_mode) {
         if (sim_frame >= 28 && sim_frame <= 30) {
-            *x = 28;
-            *y = PB_DISP_H - 28;
+            *x = 21;
+            *y = PB_DISP_H - 19;
             return true;
         }
         if ((sim_frame >= 44 && sim_frame <= 46) || (sim_frame >= 60 && sim_frame <= 62)) {
