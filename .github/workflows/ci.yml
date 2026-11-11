@@ -40,6 +40,9 @@ jobs:
       - name: esp32-s3
         working-directory: firmware
         run: pio run -e esp32s3
+      - name: xiao v2
+        working-directory: firmware
+        run: pio run -e v2
 
   case:
     runs-on: ubuntu-latest

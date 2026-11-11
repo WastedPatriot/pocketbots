@@ -68,7 +68,7 @@ void app_loop(void) {
     uint32_t idle = port_millis() - last_activity;
     uint32_t ambient_ms = (uint32_t)PB_CFG_AMBIENT_AFTER_S * 1000u;
     uint32_t sleep_ms = (uint32_t)PB_CFG_SLEEP_AFTER_S * 1000u;
-    if (idle > sleep_ms && !down && !ui_shade_open()) {
+    if (idle > sleep_ms && !down && !ui_blocks_sleep()) {
         port_sleep();
         app_note_activity();
         ui_wake();

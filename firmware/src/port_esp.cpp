@@ -282,6 +282,11 @@ bool port_read_touch(int *x, int *y) {
     return true;
 }
 
+/* The 1.64 has no camera. The lens button stays hidden. */
+bool port_camera_available(void) { return false; }
+bool port_camera_preview(uint16_t *, int, int) { return false; }
+int port_camera_snap(const uint16_t *, int, int) { return -1; }
+
 static bool IRAM_ATTR on_color_done(esp_lcd_panel_io_handle_t, esp_lcd_panel_io_event_data_t *, void *ctx) {
     lv_display_flush_ready((lv_display_t *)ctx);
     return false;

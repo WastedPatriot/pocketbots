@@ -10,13 +10,11 @@
 #include <string.h>
 #include <time.h>
 
-#define PB_DISP_W 280
-#define PB_DISP_H 456
-
 static uint32_t sim_ms;
 static int sim_frame;
 static bool dumping;
 static bool sheet;
+static bool lens_mode;
 static int saved_bri = PB_CFG_BRIGHTNESS;
 static bool egg;
 static int battery = 76;
@@ -40,15 +38,82 @@ bool port_take_shake(void) { return false; }
 void port_poll(void) {}
 void port_sleep(void) { port_log("sleep (sim, skipped)"); }
 
-/* A scripted finger, so the dumped GIF actually changes cards. */
+#include "sim_jpeg.inc"
+
+static uint16_t pack565(int r, int g, int b) {
+    return (uint16_t)(((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3));
+}
+
+/* A small room, so the viewfinder is obviously a camera and not a second bot. */
+bool port_camera_available(void) { return true; }
+
+bool port_camera_preview(uint16_t *dst, int w, int h) {
+    if (!dst || w < 8 || h < 8) return false;
+    int drift = (sim_frame % 24) - 12;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            bool floor = y > h * 58 / 100;
+            int r, g, b;
+            if (!floor) {
+                int t = y * 255 / (h * 58 / 100 + 1);
+                r = 22 + t / 9;
+                g = 34 + t / 6;
+                b = 62 + t / 5;
+            } else {
+                r = 42;
+                g = 36;
+                b = 30;
+            }
+            int wx = w * 62 / 100;
+            int wy = h * 18 / 100;
+            if (x > wx && x < wx + w / 5 && y > wy && y < wy + h / 4) {
+                r = 210;
+                g = 196;
+                b = 150;
+            }
+            int cx = w / 2 + drift;
+            int cy = h * 48 / 100;
+            int dx = x - cx;
+            int dy = y - cy;
+            if (dx * dx + dy * dy * 2 < (h / 5) * (h / 5)) {
+                r = 30;
+                g = 136;
+                b = 255;
+            }
+            dst[(size_t)y * (size_t)w + (size_t)x] = pack565(r, g, b);
+        }
+    }
+    return true;
+}
+
+int port_camera_snap(const uint16_t *frame, int w, int h) {
+    if (!frame || w != PB_FRAME_W || h != PB_FRAME_H) return -1;
+    return gallery_push(frame, k_sim_jpeg, k_sim_jpeg_len);
+}
+
+/* A scripted finger. dump swipes the carousel. lens opens the viewfinder,
+   taps the shutter, then keeps the frame. Coordinates match ui.cpp. */
 bool port_read_touch(int *x, int *y) {
     if (sheet) return false;
-    /* Splash occupies the first 1.1s. Then Cyber idles, blinks, and we
-       drag left onto Vik. */
+    if (lens_mode) {
+        if (sim_frame >= 28 && sim_frame <= 30) {
+            *x = 28;
+            *y = PB_DISP_H - 28;
+            return true;
+        }
+        if ((sim_frame >= 44 && sim_frame <= 46) || (sim_frame >= 60 && sim_frame <= 62)) {
+            *x = PB_DISP_W / 2;
+            *y = PB_DISP_H - 42;
+            return true;
+        }
+        return false;
+    }
+    /* Splash occupies the first 1.1s. Then Cyber idles, and we drag onto Vik.
+       y sits on the mark, clear of the lens button. */
     if (sim_frame >= 50 && sim_frame <= 78) {
         float t = (sim_frame - 50) / 28.f;
-        *x = (int)(230 - t * 180);
-        *y = 210;
+        *x = (int)(190 - t * 150);
+        *y = PB_DISP_H / 2 - 14;
         return true;
     }
     return false;
@@ -108,6 +173,8 @@ int main(int argc, char **argv) {
     const char *mode = argc > 1 ? argv[1] : "run";
     dumping = strcmp(mode, "dump") == 0;
     sheet = strcmp(mode, "sheet") == 0;
+    lens_mode = strcmp(mode, "lens") == 0;
+    if (lens_mode) dumping = true;
     srand(1);
 
     fb_w = sheet ? 780 : PB_DISP_W;
@@ -144,7 +211,7 @@ int main(int argc, char **argv) {
     }
 
     app_init();
-    int frames = dumping ? 100 : 30;
+    int frames = lens_mode ? 80 : dumping ? 100 : 30;
     if (dumping) {
         if (system("mkdir -p frames") != 0) return 2;
     }

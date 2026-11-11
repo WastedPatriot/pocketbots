@@ -13,7 +13,12 @@
 #define MUTED 0x8E8E96
 #define HAIR 0x3A3A42
 
-enum { k_max_pages = 12, k_mark = 176 };
+enum { k_max_pages = 12 };
+
+static int mark_px(void) { return PB_DISP_H >= 400 ? 176 : 128; }
+static int mark_oy(void) { return PB_DISP_H >= 400 ? -28 : -16; }
+static int name_oy(void) { return PB_DISP_H >= 400 ? 108 : 70; }
+static int sub_oy(void) { return PB_DISP_H >= 400 ? 142 : 96; }
 
 static lv_obj_t *scroller;
 static lv_obj_t *dots[k_max_pages];
@@ -34,6 +39,7 @@ static lv_obj_t *toast;
 static lv_timer_t *toast_timer;
 
 static lv_obj_t *battery_lbl;
+static lv_obj_t *lens_btn;
 static uint32_t next_battery_at;
 
 static void (*brightness_cb)(int);
@@ -139,21 +145,21 @@ static void add_page(const pb_bot_t *bot) {
     lv_obj_set_size(page, PB_DISP_W, PB_DISP_H);
     style_flat(page);
 
-    mark_create(&marks[i], page, bot, k_mark);
-    lv_obj_align(marks[i].root, LV_ALIGN_CENTER, 0, -28);
+    mark_create(&marks[i], page, bot, mark_px());
+    lv_obj_align(marks[i].root, LV_ALIGN_CENTER, 0, mark_oy());
     lv_obj_add_event_cb(marks[i].root, on_mark_clicked, LV_EVENT_CLICKED, &marks[i]);
 
     lv_obj_t *name = lv_label_create(page);
     lv_label_set_text(name, bot->name);
     lv_obj_set_style_text_font(name, &lv_font_montserrat_28, 0);
     lv_obj_set_style_text_color(name, lv_color_hex(INK), 0);
-    lv_obj_align(name, LV_ALIGN_CENTER, 0, 108);
+    lv_obj_align(name, LV_ALIGN_CENTER, 0, name_oy());
 
     lv_obj_t *sub = lv_label_create(page);
     lv_label_set_text(sub, bot->subtitle);
     lv_obj_set_style_text_font(sub, &lv_font_montserrat_14, 0);
     lv_obj_set_style_text_color(sub, lv_color_hex(MUTED), 0);
-    lv_obj_align(sub, LV_ALIGN_CENTER, 0, 142);
+    lv_obj_align(sub, LV_ALIGN_CENTER, 0, sub_oy());
     lv_obj_add_flag(sub, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(sub, on_subtitle_long, LV_EVENT_LONG_PRESSED, NULL);
 }
@@ -243,8 +249,9 @@ void ui_rebuild_carousel(void) {
     memset(marks, 0, sizeof marks);
     build_scroller();
     if (page_count > 0) lv_obj_scroll_to_view(pages[page_count - 1], LV_ANIM_ON);
-    if (shade) lv_obj_move_foreground(shade);
+    if (lens_btn) lv_obj_move_foreground(lens_btn);
     if (battery_lbl) lv_obj_move_foreground(battery_lbl);
+    if (shade) lv_obj_move_foreground(shade);
 }
 
 static void refresh_battery(void) {
@@ -279,6 +286,12 @@ static void open_shade(void) {
 bool ui_shade_open(void) {
     return shade && !lv_obj_has_flag(shade, LV_OBJ_FLAG_HIDDEN);
 }
+
+void ui_close_shade(void) {
+    if (shade) lv_obj_add_flag(shade, LV_OBJ_FLAG_HIDDEN);
+}
+
+bool ui_blocks_sleep(void) { return ui_shade_open() || ui_lens_open(); }
 
 static void build_chrome(void) {
     battery_lbl = lv_label_create(lv_screen_active());
@@ -353,7 +366,33 @@ static void build_chrome(void) {
     lv_obj_add_flag(close, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(close, [](lv_event_t *e) {
         (void)e;
-        if (shade) lv_obj_add_flag(shade, LV_OBJ_FLAG_HIDDEN);
+        ui_close_shade();
+    }, LV_EVENT_CLICKED, NULL);
+
+    if (!port_camera_available()) return;
+    /* Bottom-left, clear of the dots. Centre lands on (28, H-28), which
+       the simulator taps. A ring and a dot, nothing else. */
+    lens_btn = lv_obj_create(lv_screen_active());
+    lv_obj_set_size(lens_btn, 32, 32);
+    lv_obj_set_style_radius(lens_btn, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_opa(lens_btn, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_color(lens_btn, lv_color_hex(0xC8C8CE), 0);
+    lv_obj_set_style_border_width(lens_btn, 2, 0);
+    lv_obj_align(lens_btn, LV_ALIGN_BOTTOM_LEFT, 12, -12);
+    lv_obj_remove_flag(lens_btn, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(lens_btn, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(lens_btn, 8);
+    lv_obj_t *pupil = lv_obj_create(lens_btn);
+    lv_obj_set_size(pupil, 10, 10);
+    lv_obj_set_style_radius(pupil, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_color(pupil, lv_color_hex(0x1E88FF), 0);
+    lv_obj_set_style_border_width(pupil, 0, 0);
+    lv_obj_remove_flag(pupil, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_center(pupil);
+    lv_obj_add_event_cb(lens_btn, [](lv_event_t *e) {
+        (void)e;
+        ui_close_shade();
+        ui_open_lens();
     }, LV_EVENT_CLICKED, NULL);
 }
 
@@ -367,8 +406,9 @@ static void dismiss_splash(void) {
     splash = NULL;
     memset(&splash_mark, 0, sizeof splash_mark);
     build_scroller();
-    if (shade) lv_obj_move_foreground(shade);
+    if (lens_btn) lv_obj_move_foreground(lens_btn);
     if (battery_lbl) lv_obj_move_foreground(battery_lbl);
+    if (shade) lv_obj_move_foreground(shade);
 }
 
 static void show_splash(void) {
@@ -378,8 +418,8 @@ static void show_splash(void) {
     lv_obj_add_flag(splash, LV_OBJ_FLAG_CLICKABLE);
     const pb_bot_t *hero = pb_bot_count ? &pb_bots[0] : NULL;
     if (hero) {
-        mark_create(&splash_mark, splash, hero, k_mark);
-        lv_obj_align(splash_mark.root, LV_ALIGN_CENTER, 0, -36);
+        mark_create(&splash_mark, splash, hero, mark_px());
+        lv_obj_align(splash_mark.root, LV_ALIGN_CENTER, 0, PB_DISP_H >= 400 ? -36 : -20);
         mark_bounce(&splash_mark);
     }
     lv_obj_t *word = lv_label_create(splash);
@@ -387,13 +427,13 @@ static void show_splash(void) {
     lv_obj_set_style_text_font(word, &lv_font_montserrat_20, 0);
     lv_obj_set_style_text_color(word, lv_color_hex(INK), 0);
     lv_obj_set_style_text_letter_space(word, 1, 0);
-    lv_obj_align(word, LV_ALIGN_CENTER, 0, 96);
+    lv_obj_align(word, LV_ALIGN_CENTER, 0, PB_DISP_H >= 400 ? 96 : 62);
 
     lv_obj_t *line = lv_label_create(splash);
     lv_label_set_text(line, "mind the keys");
     lv_obj_set_style_text_font(line, &lv_font_montserrat_14, 0);
     lv_obj_set_style_text_color(line, lv_color_hex(MUTED), 0);
-    lv_obj_align(line, LV_ALIGN_CENTER, 0, 124);
+    lv_obj_align(line, LV_ALIGN_CENTER, 0, PB_DISP_H >= 400 ? 124 : 88);
 
     lv_obj_add_event_cb(splash, [](lv_event_t *e) {
         (void)e;
@@ -433,6 +473,7 @@ void ui_tick(bool dimmed) {
     uint32_t now = port_millis();
     if (splash && splash_mark.root) mark_step(&splash_mark, now, false);
     for (int i = 0; i < page_count; i++) mark_step(&marks[i], now, dimmed);
+    ui_lens_tick(now);
     if (now > next_battery_at) {
         refresh_battery();
         next_battery_at = now + 15000;
@@ -451,8 +492,20 @@ static void step_page(int dir) {
     lv_obj_scroll_to_view(pages[i], LV_ANIM_ON);
 }
 
-void ui_next(void) { step_page(1); }
-void ui_prev(void) { step_page(-1); }
+void ui_next(void) {
+    if (ui_lens_open()) {
+        ui_close_lens();
+        return;
+    }
+    step_page(1);
+}
+void ui_prev(void) {
+    if (ui_lens_open()) {
+        ui_close_lens();
+        return;
+    }
+    step_page(-1);
+}
 
 void ui_on_shake(void) {
     bool hidden = false;
