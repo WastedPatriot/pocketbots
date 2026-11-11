@@ -1,56 +1,80 @@
-// pocketbots — a soft squircle for the Waveshare ESP32-S3-Touch-AMOLED-1.64.
+// pocketbots v2 — a soft squircle for a XIAO ESP32-S3 Sense and a
+// Waveshare 1.69" 240×280 touch LCD (module 33.13 × 41.13 mm).
 //
-// The look to chase is the Amoeba One: a moulded pebble, glass close to
-// the edge, and a small loop at one top corner rather than a big tab.
-// Two PLA parts. They snap. Nothing on the face is a screw.
-// The loop is part of the back and runs the full thickness, so the hole
-// is a ring of perimeters.
+// The 1.64 shell is still in enclosure/v1/. This file is the one to print
+// for the camera build.
 //
-// Print the front face-down. Flip the back so its outside face is on
-// the bed. No supports.
+// Same idea as the Amoeba One: a moulded pebble, an even bezel, a small
+// loop at the top-right corner. Two PLA parts, a snap, no screws. The
+// loop is part of the back. There is a lens hole in the back, with a
+// shallow ring around it.
+//
+// The Sense stack is about 15 mm before the case skin, so this pebble is
+// thicker than the 1.64 one. The outline is still the pebble.
+//
+// Print the front face-down. Flip the back so its outside face is on the
+// bed. No supports.
 //
 //   openscad -o stl/front.stl   -D 'part="front"'   pocketbots.scad
 //   openscad -o stl/back.stl    -D 'part="back"'    pocketbots.scad
 //   openscad -o stl/plunger.stl -D 'part="plunger"' pocketbots.scad
 //   openscad -o stl/bumper.stl  -D 'part="bumper"'  pocketbots.scad
 //
-// The module outline, the glass and the hole pitch are from the
-// Waveshare drawing. Thickness, and where USB-C and the buttons sit,
-// are not. Those are the parameters below.
+// Module outline and the active area are from the Waveshare drawing.
+// Panel thickness, the Sense stack, where USB-C and BOOT sit, and the
+// exact lens centre are not. Those are the parameters below. Measure
+// the board you have and change the numbers before you trust a print.
 
 part = "preview"; // preview | front | back | plunger | bumper
 face = "glass";   // glass | cyber   (preview only)
 
-/* [Board — from the drawing] */
-module_w = 29.12;
-module_l = 44.00;
-active_w = 22.34;
-active_l = 36.06;
+/* [Display — from the drawing] */
+module_w = 33.13;
+module_l = 41.13;
+active_w = 27.972;
+active_l = 32.634;
 
-/* [Board — measure yours] */
-board_t = 5.2;
-usb_w = 9.0;
-usb_h = 3.2;
-boot_from_centre = -2;  // right edge. Negative is toward the USB end.
+/* [Stack — measure yours] */
+panel_t = 3.3;          // display module, glass included
+xiao_t = 15.4;          // Sense with the camera expansion, lens included
+usb_w = 9.2;
+usb_h = 3.4;
+boot_from_centre = -13; // right edge. Negative is toward the USB end.
 
 /* [Shell] */
-outer_w = 34.8;
-outer_l = 48.4;
-corner_r = 14.4;        // large on purpose. It should look squashed, not machined.
-bezel = 6.3;            // even margin of plastic around the glass
-fillet = 1.85;          // the edge round that makes it look moulded
-nest_gap = 0.30;
-recess = 0.85;          // glass sits this far behind the face
-front_h = 3.6;
-back_skin = 1.55;
-bat_w = 26;             // a 302535, 30 mm along the length
-bat_l = 31;
-bat_t = 3.7;
+wall = 2.2;             // plastic outside the module, on the long axis
+// Even margin around the active area. The width grows to match.
+outer_l = module_l + 2 * wall;
+bezel = (outer_l - active_l) / 2;
+outer_w = active_w + 2 * bezel;
+corner_r = 16.8;
+fillet = 2.05;
+nest_gap = 0.35;
+recess = 0.80;
+front_h = recess + panel_t;
 air = 0.40;
+back_skin = 1.70;
 
-/* [Loop — top right corner, small enough for a split ring] */
+/* [Cell — lies above the XIAO, not under the lens] */
+bat_w = 28;
+bat_l = 16;
+bat_t = 4.0;
+cell_y = 9.4;
+
+/* [Lens — centre of the Sense board, USB toward the bottom] */
+lens_x = 0;
+lens_y = -8.2;
+lens_d = 4.8;
+ring_d = 10.4;
+ring_deep = 0.55;
+
+/* [Loop — top right, small enough for a split ring] */
 loop_id = 5.2;
 loop_od = 9.6;
+loop_cx = outer_w / 2 - 2.4;
+loop_cy = outer_l / 2 - 2.6;
+neck_x = loop_cx - 3.4;
+neck_y = loop_cy - 3.6;
 
 /* [Button] */
 plunger_d = 2.4;
@@ -61,19 +85,13 @@ flange_h = 1.4;
 /* [Hidden] */
 eps = 0.04;
 fn = 56;
-board_back = recess + board_t;
-total_h = board_back + air + bat_t + back_skin;
-win_w = outer_w - 2 * bezel;
-win_l = outer_l - 2 * bezel;
-win_r = 7.2;
+board_back = front_h + xiao_t;
+total_h = board_back + air + back_skin;
+win_w = active_w;
+win_l = active_l;
+win_r = 8.4;
 nest_w = module_w + 2 * nest_gap;
 nest_l = module_l + 2 * nest_gap;
-// Top-right bail. The body corner is round, so the hole sits in the
-// bite the corner radius leaves, and a little past it.
-loop_cx = 15.6;
-loop_cy = 22.4;
-neck_x = 12.4;
-neck_y = 18.6;
 
 module rounded_rect(w, h, r) {
     rad = min(r, min(w, h) / 2 - 0.05);
@@ -84,12 +102,11 @@ module rounded_rect(w, h, r) {
 }
 
 module pebble() {
-    // Final size is outer_w x outer_l x total_h, faces and sides rounded.
     translate([0, 0, fillet])
         minkowski() {
             linear_extrude(total_h - 2 * fillet)
                 rounded_rect(outer_w - 2 * fillet, outer_l - 2 * fillet, corner_r - fillet);
-            sphere(r = fillet, $fn = 48);
+            sphere(r = fillet, $fn = 40);
         }
 }
 
@@ -102,11 +119,11 @@ module window_2d() {
 }
 
 module nest_2d() {
-    rounded_rect(nest_w, nest_l, 2.2);
+    rounded_rect(nest_w, nest_l, 3.0);
 }
 
 module cell_2d() {
-    rounded_rect(bat_w, bat_l, 2.2);
+    rounded_rect(bat_w, bat_l, 2.0);
 }
 
 module lip_2d() {
@@ -115,7 +132,6 @@ module lip_2d() {
             offset(delta = -1.05) rounded_rect(outer_w, outer_l, corner_r);
             offset(delta = -1.85) rounded_rect(outer_w, outer_l, corner_r);
         }
-        // Bumps that click into the groove. Part of the lip, so they can't float off.
         for (p = [
             [outer_w / 2 - 1.45, 0],
             [-outer_w / 2 + 1.45, 0],
@@ -127,15 +143,14 @@ module lip_2d() {
 }
 
 module bail_positive() {
-    // Soft ring, full thickness, necked into the back of the body.
     translate([0, 0, 1.05])
         minkowski() {
             linear_extrude(total_h - 2.1)
                 hull() {
                     translate([loop_cx, loop_cy]) circle(d = loop_od - 2.1, $fn = fn);
-                    translate([neck_x, neck_y]) circle(r = 2.6, $fn = 36);
+                    translate([neck_x, neck_y]) circle(r = 2.6, $fn = 32);
                 }
-            sphere(r = 1.05, $fn = 28);
+            sphere(r = 1.05, $fn = 24);
         }
 }
 
@@ -146,7 +161,6 @@ module front_solid() {
                 pebble();
                 slab(-1, front_h);
             }
-            // Lip the back closes onto. Sits in the wall, clear of the glass.
             translate([0, 0, front_h - eps])
                 linear_extrude(1.35)
                     lip_2d();
@@ -165,41 +179,40 @@ module back_solid() {
             }
             difference() {
                 bail_positive();
-                // Keep the bail off the front shell. 0.2 mm of air.
                 translate([0, 0, -1])
                     linear_extrude(front_h + 1)
                         offset(delta = 0.2) rounded_rect(outer_w, outer_l, corner_r);
             }
         }
-        // Groove for the lip.
         translate([0, 0, front_h - eps])
             linear_extrude(1.55)
                 difference() {
                     offset(delta = -0.85) rounded_rect(outer_w, outer_l, corner_r);
                     offset(delta = -2.15) rounded_rect(outer_w, outer_l, corner_r);
                 }
-        // The catches land in shallow pits.
-        // Board, down to the ledge the cell starts under.
+        // Cavity for the display's tail, the Sense stack and the cell.
         translate([0, 0, front_h - eps])
-            linear_extrude(board_back - front_h + eps)
+            linear_extrude(board_back + air - front_h + eps)
                 nest_2d();
-        // Cell. The pocket is smaller than the board, so the board can't fall in.
-        translate([0, -1.5, board_back + air])
-            linear_extrude(bat_t + 0.15)
+        // A shallow dish so the cell does not wander onto the lens.
+        translate([0, cell_y, total_h - back_skin - 0.45])
+            linear_extrude(0.7)
                 cell_2d();
-        // Leads, toward the USB end.
-        translate([0, -bat_l / 2 - 1, board_back + air])
-            cube([4.5, 7, bat_t], center = true);
-        // USB-C, in the back half of the edge.
-        translate([0, -outer_l / 2 + 0.4, board_back - usb_h * 0.35])
+        // USB-C, only through the bottom wall.
+        translate([0, -outer_l / 2 + 0.2, front_h + 1.6])
             cube([usb_w, 6.5, usb_h], center = true);
         // BOOT. Right side, a short tunnel.
-        translate([nest_w / 2 - 0.4, boot_from_centre, board_back - 1.7])
+        translate([nest_w / 2 - 0.4, boot_from_centre, front_h + 2.2])
             rotate([0, 90, 0])
                 cylinder(d = tunnel_d, h = outer_w, $fn = 28);
-        translate([nest_w / 2 + nest_gap, boot_from_centre, board_back - 1.7])
+        translate([nest_w / 2 + nest_gap, boot_from_centre, front_h + 2.2])
             rotate([0, 90, 0])
                 cylinder(d = flange_d + 0.5, h = 2.4, $fn = 28);
+        // Recessed ring, then the hole the lens looks through.
+        translate([lens_x, lens_y, total_h - ring_deep])
+            cylinder(d = ring_d, h = ring_deep + 1, $fn = 48);
+        translate([lens_x, lens_y, total_h - back_skin - 0.6])
+            cylinder(d = lens_d, h = back_skin + 1.4, $fn = 40);
         translate([loop_cx, loop_cy, -2])
             cylinder(d = loop_id, h = total_h + 6, $fn = fn);
     }
@@ -219,49 +232,58 @@ module bumper() {
             minkowski() {
                 linear_extrude(total_h)
                     rounded_rect(outer_w, outer_l, corner_r);
-                sphere(r = skin, $fn = 20);
+                sphere(r = skin, $fn = 16);
             }
         translate([0, 0, -0.2]) pebble();
         translate([0, 0, -skin - 1]) linear_extrude(skin + recess + 2) window_2d();
         translate([loop_cx, loop_cy, -skin - 1])
             cylinder(d = loop_id + 0.8, h = total_h + 4 * skin, $fn = 32);
-        translate([0, -outer_l / 2 - 2, board_back - usb_h])
+        translate([0, -outer_l / 2 - 2, front_h + 1.2])
             cube([usb_w + 1.4, 16, usb_h + 1.2], center = true);
+        translate([lens_x, lens_y, total_h - 1])
+            cylinder(d = ring_d + 1.2, h = 4, $fn = 32);
     }
 }
 
 module glass() {
-    translate([0, 0, 0.58])
+    translate([0, 0, 0.55])
         color("#10141c")
             linear_extrude(0.28)
-                rounded_rect(win_w - 0.55, win_l - 0.55, win_r - 0.3);
+                rounded_rect(win_w - 0.5, win_l - 0.5, win_r - 0.3);
 }
 
 module cyber_mark() {
-    // Flat blue hex, two dark eyes. Same family as the firmware mark.
-    // Sits in the recess, in front of the dark glass.
-    translate([0, 0.3, 0.36]) color("#1E88FF")
+    translate([0, 0.4, 0.34]) color("#1E88FF")
         linear_extrude(0.16)
             polygon([for (i = [0:5])
                 let (a = i * 60 + 30)
-                [8.3 * cos(a), 8.3 * sin(a)]
+                [9.2 * cos(a), 9.2 * sin(a)]
             ]);
-    // Closer to the face than the hex, so they read on top of it.
     color("#16161A")
         for (s = [-1, 1])
-            translate([s * 1.75, 0.85, 0.12])
+            translate([s * 1.95, 1.0, 0.10])
                 linear_extrude(0.30)
                     hull() {
-                        translate([0, -1.85]) circle(d = 2.15, $fn = 28);
-                        translate([0, 1.85]) circle(d = 2.15, $fn = 28);
+                        translate([0, -2.05]) circle(d = 2.2, $fn = 28);
+                        translate([0, 2.05]) circle(d = 2.2, $fn = 28);
                     }
 }
 
 module button_cap() {
     color("#3C8DFF")
-        translate([outer_w / 2 - 0.15, boot_from_centre, board_back - 1.7])
+        translate([outer_w / 2 - 0.15, boot_from_centre, front_h + 2.2])
             rotate([0, 90, 0])
                 cylinder(d = 3.3, h = 1.15, $fn = 28);
+}
+
+module lens_glass() {
+    // Preview only. The hole is in the STL; this stops the render reading as a puncture.
+    color("#14161c")
+        translate([lens_x, lens_y, total_h - ring_deep - 0.15])
+            cylinder(d = lens_d - 0.5, h = 0.25, $fn = 40);
+    color("#3a4250")
+        translate([lens_x - 0.7, lens_y + 0.5, total_h - ring_deep - 0.02])
+            cylinder(d = 1.3, h = 0.08, $fn = 24);
 }
 
 if (part == "front") front_solid();
@@ -274,4 +296,5 @@ else {
     glass();
     if (face == "cyber") cyber_mark();
     button_cap();
+    lens_glass();
 }
