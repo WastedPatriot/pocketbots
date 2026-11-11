@@ -1,0 +1,8 @@
+pocketbots is MIT licensed. See LICENSE.
+
+firmware/lib/esp_lcd_co5300/ is the Espressif CO5300 panel driver from
+esp-iot-solution, version 2.2.0, Apache-2.0. Its license is in
+firmware/lib/esp_lcd_co5300/LICENSE. The only change in that tree is a
+dummy member on an otherwise empty union, so the header compiles as C++
+on a chip without MIPI-DSI. The note is at the top of
+firmware/lib/esp_lcd_co5300/include/esp_lcd_co5300.h.

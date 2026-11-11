@@ -1,0 +1,9 @@
+{
+  "name": "esp_lcd_co5300",
+  "version": "2.2.0",
+  "description": "Espressif CO5300 QSPI panel driver, vendored from esp-iot-solution. Apache-2.0.",
+  "build": {
+    "srcDir": "src",
+    "includeDir": "include"
+  }
+}
